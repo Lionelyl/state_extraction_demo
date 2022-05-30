@@ -8,7 +8,7 @@ Django
 ## file tree
 ```shell
 ├── app # app
-├── extration_by_rule
+├── extraction_by_rule
 │   ├── Rule_related
 │   └── raw_text
 ├── state_extraction_demo # django
