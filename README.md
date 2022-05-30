@@ -6,7 +6,7 @@ BootStrap
 Django
 
 ## file tree
-```shell```
+```shell
 ├── app # app
 ├── extration_by_rule
 │   ├── Rule_related
@@ -14,3 +14,4 @@ Django
 ├── state_extraction_demo # django
 ├── db.sqlite3
 └── manage.py
+```
