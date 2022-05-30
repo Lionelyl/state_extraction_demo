@@ -1,0 +1,80 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="{% static 'plugins/echart-5.3.2/dist/echarts.js' %}"></script>
+</head>
+<body>
+<!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+<div id="main" style="width: available; height: 600px;  margin: 50px auto"></div>
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 指定图表的配置项和数据
+    option = {
+        title: {
+            text: 'State Machine Graph'
+        },
+        tooltip: {},
+        animationDurationUpdate: 1500,
+        animationEasingUpdate: 'quinticInOut',
+        series: [
+            {
+                type: 'graph',
+                layout: 'force',
+                force: {
+                    repulsion: 10000,
+                    edgeLength: 50,
+                    gravity: 0.1
+                },
+                symbolSize: 50,
+                roam: true,
+                label: {
+                    show: true
+                },
+                edgeSymbol: ['circle', 'arrow'],
+                edgeSymbolSize: [4, 10],
+                edgeLabel: {
+                    fontSize: 15
+                },
+                data: [
+                    {
+                        name: '{{ obj.cur_state }}',
+                        x: 300,
+                        y: 300
+                    },
+                    {
+                        name: '{{ obj.new_state }}',
+                        x: 800,
+                        y: 300
+                    },
+                ],
+                // links: [],
+                links: [
+                    {
+                        source: 0,
+                        target: 1,
+                        symbolSize: [5, 20],
+                        label: {
+                            normal: {
+                                show: true,
+                                formatter:'{{ obj.condition }}'
+                            }
+                        },
+                        lineStyle: {
+                            width: 5,
+                            curveness: 0.2
+                        }
+                    },
+                    ]
+            }
+        ]
+    };
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+</body>
+</html>

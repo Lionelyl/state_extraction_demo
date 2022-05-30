@@ -1,0 +1,43 @@
+{% extends 'layout.html' %}
+
+{% block container %}
+<div class="container">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            Extract Result
+        </div>
+
+        <table class="table table-bordered">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>raw text</th>`
+                <th>related sentence</th>
+                <th>current state</th>
+                <th>transfer condition</th>
+                <th>new state(or state change)</th>
+                <th>option</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for obj in data %}
+                <tr>
+                    <th scope="row">{{ obj.id }}</th>
+                    <td >{{ obj.title }} {{ obj.text }}</td>
+                    <td>{{ obj.sentence }}</td>
+                    <td>{{ obj.cur_state}}</td>
+                    <td>{{ obj.condition }}</td>
+                    <td>{{ obj.new_state }}</td>
+                    <td>
+{#                        <a class="btn btn-primary btn-xs" style="width: 44px" href="/edit/?nid={{ obj.id }}">edit</a>#}
+                        <a class="btn btn-primary btn-xs" style="width: 44px; margin-bottom: 5px" href="/edit/{{ obj.id }}/" >edit</a>
+                        <a class="btn btn-danger btn-xs" href="/delete/?nid={{ obj.id }}">delete</a>
+                        <a class="btn btn-info btn-xs" style="width: 44px; margin-top: 5px" href="/draw/{{ obj.id }}" target="_blank">draw</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
