@@ -1,0 +1,216 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="{% static 'plugins/echart-5.3.2/dist/echarts.js' %}"></script>
+</head>
+<body>
+<!-- 为 ECharts 准备一个定义了宽高的 DOM -->
+<div id="main" style="width: available; height: 600px;  margin: 50px auto"></div>
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart = echarts.init(document.getElementById('main'));
+
+    // 指定图表的配置项和数据
+    option = {
+        title: {
+            text: 'State Machine Graph'
+        },
+        tooltip: {},
+        animationDurationUpdate: 1500,
+        animationEasingUpdate: 'quinticInOut',
+        series: [
+            {
+                type: 'graph',
+                layout: 'force',
+                {#layout: '',#}
+                force: {
+                    repulsion: 10000,
+                    edgeLength: 50,
+                    gravity: 0.1
+                },
+                symbolSize: 50,
+                roam: true,
+                label: {
+                    show: true
+                },
+                edgeSymbol: ['circle', 'arrow'],
+                edgeSymbolSize: [4, 10],
+                edgeLabel: {
+                    fontSize: 15
+                },
+                data: [
+                    {
+                        name: 'unknown',
+                        x: 100,
+                        y: 350
+                    },
+                    {
+                        name: 'adjacencyStateChange (Up)',
+                        x: 300,
+                        y: 200
+                    },
+                    {
+                        name: 'Initialising',
+                        x: 300,
+                        y: 300
+                    },
+                    {
+                        name: 'Up',
+                        x: 300,
+                        y: 400
+                    },
+                    {
+                        name: 'adjacencyStateChange (Down)',
+                        x: 300,
+                        y: 500
+                    },
+                ],
+                // links: [],
+                links: [
+                    {
+                        source: 'unknown',
+                        target: 'adjacencyStateChange (Up)',
+                        symbolSize: [5, 20],
+                        label: {
+                            normal: {
+                                show: true,
+                                formatter:'When a new data link address or NSAP address is added to the adjacency database'
+                            }
+                        },
+                        lineStyle: {
+                            width: 5,
+                            curveness: 0.2
+                        }
+                    },
+                    {
+                        source: 'unknown',
+                        target: 'Initialising',
+                        symbolSize: [5, 20],
+                        label: {
+                            normal: {
+                                show: true,
+                                formatter:'If the adjacencyState is “Up” and the ID portion of the NET field in the ISH PDU does not match the neigh-bourID of the adjacency',
+                            }
+                        },
+                        lineStyle: {
+                            width: 5,
+                            curveness: 0.2
+                        }
+                    },
+                    {
+                        source: 'unknown',
+                        target: 'adjacencyStateChange (Down)',
+                        symbolSize: [5, 20],
+                        label: {
+                            normal: {
+                                show: true,
+                                formatter:'If the local system is of iSType “L1IntermediateSystem” and the adjacency is in state “Up”',
+                            }
+                        },
+                        lineStyle: {
+                            width: 5,
+                            curveness: 0.2
+                        }
+                    },
+                    {
+                        source: 'unknown',
+                        target: 'adjacencyStateChange (Down)',
+                        symbolSize: [5, 20],
+                        label: {
+                            normal: {
+                                show: true,
+                                formatter:'If a neighbour is not heard from in that time',
+                            }
+                        },
+                        lineStyle: {
+                            width: 5,
+                            curveness: 0.2
+                        }
+                    },
+                    {
+                        source: 'unknown',
+                        target: 'Up',
+                        symbolSize: [5, 20],
+                        label: {
+                            normal: {
+                                show: true,
+                                formatter:'When R reports the local system’s SNPA address in its Level n LAN IIH PDUs',
+                            }
+                        },
+                        lineStyle: {
+                            width: 5,
+                            curveness: 0.2
+                        }
+                    },
+                    {
+                        source: 'unknown',
+                        target: 'adjacencyStateChange (Down)',
+                        symbolSize: [5, 20],
+                        label: {
+                            normal: {
+                                show: true,
+                                formatter:'If a neighbour is not heard from in that time',
+                            }
+                        },
+                        lineStyle: {
+                            width: 5,
+                            curveness: 0.2
+                        }
+                    },
+                    {
+                        source: 'unknown',
+                        target: 'Initialising',
+                        symbolSize: [5, 20],
+                        label: {
+                            normal: {
+                                show: true,
+                                formatter:'If a Level n LAN IIH PDU is received from neighbour N, and this system’s lANAddress is no longer in N’s IIH PDU',
+                            }
+                        },
+                        lineStyle: {
+                            width: 5,
+                            curveness: 0.2
+                        }
+                    },
+                    {
+                        source: 'unknown',
+                        target: 'adjacencyStateChange (Down)',
+                        symbolSize: [5, 20],
+                        label: {
+                            normal: {
+                                show: true,
+                                formatter:'If an old adjacency must be purged',
+                            }
+                        },
+                        lineStyle: {
+                            width: 5,
+                            curveness: 0.2
+                        }
+                    },
+                    {
+                        source: 'unknown',
+                        target: 'adjacencyStateChange (Up))',
+                        symbolSize: [5, 20],
+                        label: {
+                            normal: {
+                                show: true,
+                                formatter:'When a new data link address or NSAP address is added to the adjacency database',
+                            }
+                        },
+                        lineStyle: {
+                            width: 5,
+                            curveness: 0.2
+                        }
+                    },
+                    ]
+            }
+        ]
+    };
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+</script>
+</body>
+</html>

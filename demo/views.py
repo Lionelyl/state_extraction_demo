@@ -54,3 +54,15 @@ def edit(request, nid):
 def draw(request, nid):
     obj = models.Result.objects.filter(id=nid).first()
     return render(request,'draw.html',{'obj':obj})
+
+def draw_all(requst):
+    alls = models.Result.objects.all()
+    print(type(alls))
+    state_list = set()
+    for item in alls:
+        print(item.cur_state, item.new_state, item.condition)
+        state_list.add(item.cur_state)
+        state_list.add(item.new_state)
+    state_list = list(state_list)
+
+    return render(requst, 'draw_all.html', {'obj':alls})

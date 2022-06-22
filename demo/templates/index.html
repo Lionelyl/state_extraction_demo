@@ -31,7 +31,7 @@
                     <td>
 {#                        <a class="btn btn-primary btn-xs" style="width: 44px" href="/edit/?nid={{ obj.id }}">edit</a>#}
                         <a class="btn btn-primary btn-xs" style="width: 44px; margin-bottom: 5px" href="/edit/{{ obj.id }}/" >edit</a>
-                        <a class="btn btn-danger btn-xs" href="/delete/?nid={{ obj.id }}">delete</a>
+                        <a class="btn btn-danger btn-xs" onclick="return confirm('是否删除？')" href="/delete/?nid={{ obj.id }}">delete</a>
                         <a class="btn btn-info btn-xs" style="width: 44px; margin-top: 5px" href="/draw/{{ obj.id }}" target="_blank">draw</a>
                     </td>
                 </tr>
