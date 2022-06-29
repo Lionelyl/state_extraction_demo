@@ -1,0 +1,820 @@
+9.  The Interface Data Structure
+
+    An OSPF interface is the connection between a router and a network.
+    We assume a single OSPF interface to each attached network/subnet,
+    although supporting multiple interfaces on a single network is
+    considered in Appendix F. Each interface structure has at most one
+    IP interface address.
+
+
+
+
+
+Moy                         Standards Track                    [Page 63]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+    An OSPF interface can be considered to belong to the area that
+    contains the attached network.  All routing protocol packets
+    originated by the router over this interface are labelled with the
+    interface's Area ID.  One or more router adjacencies may develop
+    over an interface.  A router's LSAs reflect the state of its
+    interfaces and their associated adjacencies.
+
+    The following data items are associated with an interface.  Note
+    that a number of these items are actually configuration for the
+    attached network; such items must be the same for all routers
+    connected to the network.
+
+    Type
+        The OSPF interface type is either point-to-point, broadcast,
+        NBMA, Point-to-MultiPoint or virtual link.
+
+    State
+        The functional level of an interface.  State determines whether
+        or not full adjacencies are allowed to form over the interface.
+        State is also reflected in the router's LSAs.
+
+    IP interface address
+        The IP address associated with the interface.  This appears as
+        the IP source address in all routing protocol packets originated
+        over this interface.  Interfaces to unnumbered point-to-point
+        networks do not have an associated IP address.
+
+    IP interface mask
+        Also referred to as the subnet mask, this indicates the portion
+        of the IP interface address that identifies the attached
+        network.  Masking the IP interface address with the IP interface
+        mask yields the IP network number of the attached network.  On
+        point-to-point networks and virtual links, the IP interface mask
+        is not defined. On these networks, the link itself is not
+        assigned an IP network number, and so the addresses of each side
+        of the link are assigned independently, if they are assigned at
+        all.
+
+    Area ID
+        The Area ID of the area to which the attached network belongs.
+        All routing protocol packets originating from the interface are
+        labelled with this Area ID.
+
+
+
+Moy                         Standards Track                    [Page 64]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+    HelloInterval
+        The length of time, in seconds, between the Hello packets that
+        the router sends on the interface.  Advertised in Hello packets
+        sent out this interface.
+
+    RouterDeadInterval
+        The number of seconds before the router's neighbors will declare
+        it down, when they stop hearing the router's Hello Packets.
+        Advertised in Hello packets sent out this interface.
+
+    InfTransDelay
+        The estimated number of seconds it takes to transmit a Link
+        State Update Packet over this interface.  LSAs contained in the
+        Link State Update packet will have their age incremented by this
+        amount before transmission.  This value should take into account
+        transmission and propagation delays; it must be greater than
+        zero.
+
+    Router Priority
+        An 8-bit unsigned integer.  When two routers attached to a
+        network both attempt to become Designated Router, the one with
+        the highest Router Priority takes precedence.  A router whose
+        Router Priority is set to 0 is ineligible to become Designated
+        Router on the attached network.  Advertised in Hello packets
+        sent out this interface.
+
+    Hello Timer
+        An interval timer that causes the interface to send a Hello
+        packet.  This timer fires every HelloInterval seconds.  Note
+        that on non-broadcast networks a separate Hello packet is sent
+        to each qualified neighbor.
+
+    Wait Timer
+        A single shot timer that causes the interface to exit the
+        Waiting state, and as a consequence select a Designated Router
+        on the network.  The length of the timer is RouterDeadInterval
+        seconds.
+
+    List of neighboring routers
+        The other routers attached to this network.  This list is formed
+        by the Hello Protocol.  Adjacencies will be formed to some of
+
+
+
+
+Moy                         Standards Track                    [Page 65]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+        these neighbors.  The set of adjacent neighbors can be
+        determined by an examination of all of the neighbors' states.
+
+    Designated Router
+        The Designated Router selected for the attached network.  The
+        Designated Router is selected on all broadcast and NBMA networks
+        by the Hello Protocol.  Two pieces of identification are kept
+        for the Designated Router: its Router ID and its IP interface
+        address on the network.  The Designated Router advertises link
+        state for the network; this network-LSA is labelled with the
+        Designated Router's IP address.  The Designated Router is
+        initialized to 0.0.0.0, which indicates the lack of a Designated
+        Router.
+
+    Backup Designated Router
+        The Backup Designated Router is also selected on all broadcast
+        and NBMA networks by the Hello Protocol.  All routers on the
+        attached network become adjacent to both the Designated Router
+        and the Backup Designated Router.  The Backup Designated Router
+        becomes Designated Router when the current Designated Router
+        fails.  The Backup Designated Router is initialized to 0.0.0.0,
+        indicating the lack of a Backup Designated Router.
+
+    Interface output cost(s)
+        The cost of sending a data packet on the interface, expressed in
+        the link state metric.  This is advertised as the link cost for
+        this interface in the router-LSA. The cost of an interface must
+        be greater than zero.
+
+    RxmtInterval
+        The number of seconds between LSA retransmissions, for
+        adjacencies belonging to this interface.  Also used when
+        retransmitting Database Description and Link State Request
+        Packets.
+
+    AuType
+        The type of authentication used on the attached network/subnet.
+        Authentication types are defined in Appendix D.  All OSPF packet
+        exchanges are authenticated.  Different authentication schemes
+        may be used on different networks/subnets.
+
+
+
+
+
+Moy                         Standards Track                    [Page 66]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+    Authentication key
+        This configured data allows the authentication procedure to
+        generate and/or verify OSPF protocol packets.  The
+        Authentication key can be configured on a per-interface basis.
+        For example, if the AuType indicates simple password, the
+        Authentication key would be a 64-bit clear password which is
+        inserted into the OSPF packet header. If instead Autype
+        indicates Cryptographic authentication, then the Authentication
+        key is a shared secret which enables the generation/verification
+        of message digests which are appended to the OSPF protocol
+        packets. When Cryptographic authentication is used, multiple
+        simultaneous keys are supported in order to achieve smooth key
+        transition (see Section D.3).
+
+
+    9.1.  Interface states
+
+        The various states that router interfaces may attain is
+        documented in this section.  The states are listed in order of
+        progressing functionality.  For example, the inoperative state
+        is listed first, followed by a list of intermediate states
+        before the final, fully functional state is achieved.  The
+        specification makes use of this ordering by sometimes making
+        references such as "those interfaces in state greater than X".
+        Figure 11 shows the graph of interface state changes.  The arcs
+        of the graph are labelled with the event causing the state
+        change.  These events are documented in Section 9.2.  The
+        interface state machine is described in more detail in Section
+        9.3.
+
+
+        Down
+            This is the initial interface state.  In this state, the
+            lower-level protocols have indicated that the interface is
+            unusable.  No protocol traffic at all will be sent or
+            received on such a interface.  In this state, interface
+            parameters should be set to their initial values.  All
+            interface timers should be disabled, and there should be no
+            adjacencies associated with the interface.
+
+        Loopback
+            In this state, the router's interface to the network is
+
+
+
+Moy                         Standards Track                    [Page 67]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+
+                                  +----+   UnloopInd   +--------+
+                                  |Down|<--------------|Loopback|
+                                  +----+               +--------+
+                                     |
+                                     |InterfaceUp
+                          +-------+  |               +--------------+
+                          |Waiting|<-+-------------->|Point-to-point|
+                          +-------+                  +--------------+
+                              |
+                     WaitTimer|BackupSeen
+                              |
+                              |
+                              |   NeighborChange
+          +------+           +-+<---------------- +-------+
+          |Backup|<----------|?|----------------->|DROther|
+          +------+---------->+-+<-----+           +-------+
+                    Neighbor  |       |
+                    Change    |       |Neighbor
+                              |       |Change
+                              |     +--+
+                              +---->|DR|
+                                    +--+
+
+                      Figure 11: Interface State changes
+
+                 In addition to the state transitions pictured,
+                 Event InterfaceDown always forces Down State, and
+                 Event LoopInd always forces Loopback State
+
+
+            looped back.  The interface may be looped back in hardware
+            or software.  The interface will be unavailable for regular
+            data traffic.  However, it may still be desirable to gain
+            information on the quality of this interface, either through
+            sending ICMP pings to the interface or through something
+            like a bit error test.  For this reason, IP packets may
+            still be addressed to an interface in Loopback state.  To
+
+
+
+
+
+
+
+Moy                         Standards Track                    [Page 68]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+            facilitate this, such interfaces are advertised in router-
+            LSAs as single host routes, whose destination is the IP
+            interface address.[4]
+
+        Waiting
+            In this state, the router is trying to determine the
+            identity of the (Backup) Designated Router for the network.
+            To do this, the router monitors the Hello Packets it
+            receives.  The router is not allowed to elect a Backup
+            Designated Router nor a Designated Router until it
+            transitions out of Waiting state.  This prevents unnecessary
+            changes of (Backup) Designated Router.
+
+        Point-to-point
+            In this state, the interface is operational, and connects
+            either to a physical point-to-point network or to a virtual
+            link.  Upon entering this state, the router attempts to form
+            an adjacency with the neighboring router.  Hello Packets are
+            sent to the neighbor every HelloInterval seconds.
+
+        DR Other
+            The interface is to a broadcast or NBMA network on which
+            another router has been selected to be the Designated
+            Router.  In this state, the router itself has not been
+            selected Backup Designated Router either.  The router forms
+            adjacencies to both the Designated Router and the Backup
+            Designated Router (if they exist).
+
+        Backup
+            In this state, the router itself is the Backup Designated
+            Router on the attached network.  It will be promoted to
+            Designated Router when the present Designated Router fails.
+            The router establishes adjacencies to all other routers
+            attached to the network.  The Backup Designated Router
+            performs slightly different functions during the Flooding
+            Procedure, as compared to the Designated Router (see Section
+            13.3).  See Section 7.4 for more details on the functions
+            performed by the Backup Designated Router.
+
+        DR  In this state, this router itself is the Designated Router
+            on the attached network.  Adjacencies are established to all
+            other routers attached to the network.  The router must also
+
+
+
+Moy                         Standards Track                    [Page 69]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+            originate a network-LSA for the network node.  The network-
+            LSA will contain links to all routers (including the
+            Designated Router itself) attached to the network.  See
+            Section 7.3 for more details on the functions performed by
+            the Designated Router.
+
+
+    9.2.  Events causing interface state changes
+
+        State changes can be effected by a number of events.  These
+        events are pictured as the labelled arcs in Figure 11.  The
+        label definitions are listed below.  For a detailed explanation
+        of the effect of these events on OSPF protocol operation,
+        consult Section 9.3.
+
+
+        InterfaceUp
+            Lower-level protocols have indicated that the network
+            interface is operational.  This enables the interface to
+            transition out of Down state.  On virtual links, the
+            interface operational indication is actually a result of the
+            shortest path calculation (see Section 16.7).
+
+        WaitTimer
+            The Wait Timer has fired, indicating the end of the waiting
+            period that is required before electing a (Backup)
+            Designated Router.
+
+        BackupSeen
+            The router has detected the existence or non-existence of a
+            Backup Designated Router for the network.  This is done in
+            one of two ways.  First, an Hello Packet may be received
+            from a neighbor claiming to be itself the Backup Designated
+            Router.  Alternatively, an Hello Packet may be received from
+            a neighbor claiming to be itself the Designated Router, and
+            indicating that there is no Backup Designated Router.  In
+            either case there must be bidirectional communication with
+            the neighbor, i.e., the router must also appear in the
+            neighbor's Hello Packet.  This event signals an end to the
+            Waiting state.
+
+
+
+
+
+Moy                         Standards Track                    [Page 70]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+        NeighborChange
+            There has been a change in the set of bidirectional
+            neighbors associated with the interface.  The (Backup)
+            Designated Router needs to be recalculated.  The following
+            neighbor changes lead to the NeighborChange event.  For an
+            explanation of neighbor states, see Section 10.1.
+
+            o   Bidirectional communication has been established to a
+                neighbor.  In other words, the state of the neighbor has
+                transitioned to 2-Way or higher.
+
+            o   There is no longer bidirectional communication with a
+                neighbor.  In other words, the state of the neighbor has
+                transitioned to Init or lower.
+
+            o   One of the bidirectional neighbors is newly declaring
+                itself as either Designated Router or Backup Designated
+                Router.  This is detected through examination of that
+                neighbor's Hello Packets.
+
+            o   One of the bidirectional neighbors is no longer
+                declaring itself as Designated Router, or is no longer
+                declaring itself as Backup Designated Router.  This is
+                again detected through examination of that neighbor's
+                Hello Packets.
+
+            o   The advertised Router Priority for a bidirectional
+                neighbor has changed.  This is again detected through
+                examination of that neighbor's Hello Packets.
+
+        LoopInd
+            An indication has been received that the interface is now
+            looped back to itself.  This indication can be received
+            either from network management or from the lower level
+            protocols.
+
+        UnloopInd
+            An indication has been received that the interface is no
+            longer looped back.  As with the LoopInd event, this
+
+
+
+
+
+
+Moy                         Standards Track                    [Page 71]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+            indication can be received either from network management or
+            from the lower level protocols.
+
+        InterfaceDown
+            Lower-level protocols indicate that this interface is no
+            longer functional.  No matter what the current interface
+            state is, the new interface state will be Down.
+
+    9.3.  The Interface state machine
+
+        A detailed description of the interface state changes follows.
+        Each state change is invoked by an event (Section 9.2).  This
+        event may produce different effects, depending on the current
+        state of the interface.  For this reason, the state machine
+        below is organized by current interface state and received
+        event.  Each entry in the state machine describes the resulting
+        new interface state and the required set of additional actions.
+
+        When an interface's state changes, it may be necessary to
+        originate a new router-LSA.  See Section 12.4 for more details.
+
+        Some of the required actions below involve generating events for
+        the neighbor state machine.  For example, when an interface
+        becomes inoperative, all neighbor connections associated with
+        the interface must be destroyed.  For more information on the
+        neighbor state machine, see Section 10.3.
+
+
+         State(s):  Down
+
+            Event:  InterfaceUp
+
+        New state:  Depends upon action routine
+
+           Action:  Start the interval Hello Timer, enabling the
+                    periodic sending of Hello packets out the interface.
+                    If the attached network is a physical point-to-point
+                    network, Point-to-MultiPoint network or virtual
+                    link, the interface state transitions to Point-to-
+                    Point.  Else, if the router is not eligible to
+                    become Designated Router the interface state
+                    transitions to DR Other.
+
+
+
+Moy                         Standards Track                    [Page 72]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+                    Otherwise, the attached network is a broadcast or
+                    NBMA network and the router is eligible to become
+                    Designated Router.  In this case, in an attempt to
+                    discover the attached network's Designated Router
+                    the interface state is set to Waiting and the single
+                    shot Wait Timer is started.  Additionally, if the
+                    network is an NBMA network examine the configured
+                    list of neighbors for this interface and generate
+                    the neighbor event Start for each neighbor that is
+                    also eligible to become Designated Router.
+
+
+         State(s):  Waiting
+
+            Event:  BackupSeen
+
+        New state:  Depends upon action routine.
+
+           Action:  Calculate the attached network's Backup Designated
+                    Router and Designated Router, as shown in Section
+                    9.4.  As a result of this calculation, the new state
+                    of the interface will be either DR Other, Backup or
+                    DR.
+
+
+         State(s):  Waiting
+
+            Event:  WaitTimer
+
+        New state:  Depends upon action routine.
+
+           Action:  Calculate the attached network's Backup Designated
+                    Router and Designated Router, as shown in Section
+                    9.4.  As a result of this calculation, the new state
+                    of the interface will be either DR Other, Backup or
+                    DR.
+
+
+         State(s):  DR Other, Backup or DR
+
+            Event:  NeighborChange
+
+
+
+
+Moy                         Standards Track                    [Page 73]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+        New state:  Depends upon action routine.
+
+           Action:  Recalculate the attached network's Backup Designated
+                    Router and Designated Router, as shown in Section
+                    9.4.  As a result of this calculation, the new state
+                    of the interface will be either DR Other, Backup or
+                    DR.
+
+
+         State(s):  Any State
+
+            Event:  InterfaceDown
+
+        New state:  Down
+
+           Action:  All interface variables are reset, and interface
+                    timers disabled.  Also, all neighbor connections
+                    associated with the interface are destroyed.  This
+                    is done by generating the event KillNbr on all
+                    associated neighbors (see Section 10.2).
+
+
+         State(s):  Any State
+
+            Event:  LoopInd
+
+        New state:  Loopback
+
+           Action:  Since this interface is no longer connected to the
+                    attached network the actions associated with the
+                    above InterfaceDown event are executed.
+
+
+         State(s):  Loopback
+
+            Event:  UnloopInd
+
+        New state:  Down
+
+           Action:  No actions are necessary.  For example, the
+                    interface variables have already been reset upon
+                    entering the Loopback state.  Note that reception of
+
+
+
+Moy                         Standards Track                    [Page 74]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+                    an InterfaceUp event is necessary before the
+                    interface again becomes fully functional.
+
+
+    9.4.  Electing the Designated Router
+
+        This section describes the algorithm used for calculating a
+        network's Designated Router and Backup Designated Router.  This
+        algorithm is invoked by the Interface state machine.  The
+        initial time a router runs the election algorithm for a network,
+        the network's Designated Router and Backup Designated Router are
+        initialized to 0.0.0.0.  This indicates the lack of both a
+        Designated Router and a Backup Designated Router.
+
+        The Designated Router election algorithm proceeds as follows:
+        Call the router doing the calculation Router X.  The list of
+        neighbors attached to the network and having established
+        bidirectional communication with Router X is examined.  This
+        list is precisely the collection of Router X's neighbors (on
+        this network) whose state is greater than or equal to 2-Way (see
+        Section 10.1).  Router X itself is also considered to be on the
+        list.  Discard all routers from the list that are ineligible to
+        become Designated Router.  (Routers having Router Priority of 0
+        are ineligible to become Designated Router.)  The following
+        steps are then executed, considering only those routers that
+        remain on the list:
+
+        (1) Note the current values for the network's Designated Router
+            and Backup Designated Router.  This is used later for
+            comparison purposes.
+
+        (2) Calculate the new Backup Designated Router for the network
+            as follows.  Only those routers on the list that have not
+            declared themselves to be Designated Router are eligible to
+            become Backup Designated Router.  If one or more of these
+            routers have declared themselves Backup Designated Router
+            (i.e., they are currently listing themselves as Backup
+            Designated Router, but not as Designated Router, in their
+            Hello Packets) the one having highest Router Priority is
+            declared to be Backup Designated Router.  In case of a tie,
+            the one having the highest Router ID is chosen.  If no
+            routers have declared themselves Backup Designated Router,
+
+
+
+Moy                         Standards Track                    [Page 75]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+            choose the router having highest Router Priority, (again
+            excluding those routers who have declared themselves
+            Designated Router), and again use the Router ID to break
+            ties.
+
+        (3) Calculate the new Designated Router for the network as
+            follows.  If one or more of the routers have declared
+            themselves Designated Router (i.e., they are currently
+            listing themselves as Designated Router in their Hello
+            Packets) the one having highest Router Priority is declared
+            to be Designated Router.  In case of a tie, the one having
+            the highest Router ID is chosen.  If no routers have
+            declared themselves Designated Router, assign the Designated
+            Router to be the same as the newly elected Backup Designated
+            Router.
+
+        (4) If Router X is now newly the Designated Router or newly the
+            Backup Designated Router, or is now no longer the Designated
+            Router or no longer the Backup Designated Router, repeat
+            steps 2 and 3, and then proceed to step 5.  For example, if
+            Router X is now the Designated Router, when step 2 is
+            repeated X will no longer be eligible for Backup Designated
+            Router election.  Among other things, this will ensure that
+            no router will declare itself both Backup Designated Router
+            and Designated Router.[5]
+
+        (5) As a result of these calculations, the router itself may now
+            be Designated Router or Backup Designated Router.  See
+            Sections 7.3 and 7.4 for the additional duties this would
+            entail.  The router's interface state should be set
+            accordingly.  If the router itself is now Designated Router,
+            the new interface state is DR.  If the router itself is now
+            Backup Designated Router, the new interface state is Backup.
+            Otherwise, the new interface state is DR Other.
+
+        (6) If the attached network is an NBMA network, and the router
+            itself has just become either Designated Router or Backup
+            Designated Router, it must start sending Hello Packets to
+            those neighbors that are not eligible to become Designated
+            Router (see Section 9.5.1).  This is done by invoking the
+            neighbor event Start for each neighbor having a Router
+            Priority of 0.
+
+
+
+Moy                         Standards Track                    [Page 76]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+        (7) If the above calculations have caused the identity of either
+            the Designated Router or Backup Designated Router to change,
+            the set of adjacencies associated with this interface will
+            need to be modified.  Some adjacencies may need to be
+            formed, and others may need to be broken.  To accomplish
+            this, invoke the event AdjOK?  on all neighbors whose state
+            is at least 2-Way.  This will cause their eligibility for
+            adjacency to be reexamined (see Sections 10.3 and 10.4).
+
+
+        The reason behind the election algorithm's complexity is the
+        desire for an orderly transition from Backup Designated Router
+        to Designated Router, when the current Designated Router fails.
+        This orderly transition is ensured through the introduction of
+        hysteresis: no new Backup Designated Router can be chosen until
+        the old Backup accepts its new Designated Router
+        responsibilities.
+
+        The above procedure may elect the same router to be both
+        Designated Router and Backup Designated Router, although that
+        router will never be the calculating router (Router X) itself.
+        The elected Designated Router may not be the router having the
+        highest Router Priority, nor will the Backup Designated Router
+        necessarily have the second highest Router Priority.  If Router
+        X is not itself eligible to become Designated Router, it is
+        possible that neither a Backup Designated Router nor a
+        Designated Router will be selected in the above procedure.  Note
+        also that if Router X is the only attached router that is
+        eligible to become Designated Router, it will select itself as
+        Designated Router and there will be no Backup Designated Router
+        for the network.
+
+
+    9.5.  Sending Hello packets
+
+        Hello packets are sent out each functioning router interface.
+        They are used to discover and maintain neighbor
+        relationships.[6] On broadcast and NBMA networks, Hello Packets
+        are also used to elect the Designated Router and Backup
+        Designated Router.
+
+
+
+
+
+Moy                         Standards Track                    [Page 77]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+        The format of an Hello packet is detailed in Section A.3.2.  The
+        Hello Packet contains the router's Router Priority (used in
+        choosing the Designated Router), and the interval between Hello
+        Packets sent out the interface (HelloInterval).  The Hello
+        Packet also indicates how often a neighbor must be heard from to
+        remain active (RouterDeadInterval).  Both HelloInterval and
+        RouterDeadInterval must be the same for all routers attached to
+        a common network.  The Hello packet also contains the IP address
+        mask of the attached network (Network Mask).  On unnumbered
+        point-to-point networks and on virtual links this field should
+        be set to 0.0.0.0.
+
+        The Hello packet's Options field describes the router's optional
+        OSPF capabilities.  One optional capability is defined in this
+        specification (see Sections 4.5 and A.2).  The E-bit of the
+        Options field should be set if and only if the attached area is
+        capable of processing AS-external-LSAs (i.e., it is not a stub
+        area).  If the E-bit is set incorrectly the neighboring routers
+        will refuse to accept the Hello Packet (see Section 10.5).
+        Unrecognized bits in the Hello Packet's Options field should be
+        set to zero.
+
+        In order to ensure two-way communication between adjacent
+        routers, the Hello packet contains the list of all routers on
+        the network from which Hello Packets have been seen recently.
+        The Hello packet also contains the router's current choice for
+        Designated Router and Backup Designated Router.  A value of
+        0.0.0.0 in these fields means that one has not yet been
+        selected.
+
+        On broadcast networks and physical point-to-point networks,
+        Hello packets are sent every HelloInterval seconds to the IP
+        multicast address AllSPFRouters.  On virtual links, Hello
+        packets are sent as unicasts (addressed directly to the other
+        end of the virtual link) every HelloInterval seconds. On Point-
+        to-MultiPoint networks, separate Hello packets are sent to each
+        attached neighbor every HelloInterval seconds. Sending of Hello
+        packets on NBMA networks is covered in the next section.
+
+
+
+
+
+
+
+Moy                         Standards Track                    [Page 78]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+        9.5.1.  Sending Hello packets on NBMA networks
+
+            Static configuration information may be necessary in order
+            for the Hello Protocol to function on non-broadcast networks
+            (see Sections C.5 and C.6).  On NBMA networks, every
+            attached router which is eligible to become Designated
+            Router becomes aware of all of its neighbors on the network
+            (either through configuration or by some unspecified
+            mechanism).  Each neighbor is labelled with the neighbor's
+            Designated Router eligibility.
+
+            The interface state must be at least Waiting for any Hello
+            Packets to be sent out the NBMA interface.  Hello Packets
+            are then sent directly (as unicasts) to some subset of a
+            router's neighbors.  Sometimes an Hello Packet is sent
+            periodically on a timer; at other times it is sent as a
+            response to a received Hello Packet.  A router's hello-
+            sending behavior varies depending on whether the router
+            itself is eligible to become Designated Router.
+
+            If the router is eligible to become Designated Router, it
+            must periodically send Hello Packets to all neighbors that
+            are also eligible.  In addition, if the router is itself the
+            Designated Router or Backup Designated Router, it must also
+            send periodic Hello Packets to all other neighbors.  This
+            means that any two eligible routers are always exchanging
+            Hello Packets, which is necessary for the correct operation
+            of the Designated Router election algorithm.  To minimize
+            the number of Hello Packets sent, the number of eligible
+            routers on an NBMA network should be kept small.
+
+            If the router is not eligible to become Designated Router,
+            it must periodically send Hello Packets to both the
+            Designated Router and the Backup Designated Router (if they
+            exist).  It must also send an Hello Packet in reply to an
+            Hello Packet received from any eligible neighbor (other than
+            the current Designated Router and Backup Designated Router).
+            This is needed to establish an initial bidirectional
+            relationship with any potential Designated Router.
+
+            When sending Hello packets periodically to any neighbor, the
+            interval between Hello Packets is determined by the
+
+
+
+Moy                         Standards Track                    [Page 79]
+
+RFC 2328                     OSPF Version 2                   April 1998
+
+
+            neighbor's state.  If the neighbor is in state Down, Hello
+            Packets are sent every PollInterval seconds.  Otherwise,
+            Hello Packets are sent every HelloInterval seconds.

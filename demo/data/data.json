@@ -26,7 +26,7 @@
         "id": 0,
         "text": "When a new data link address or NSAP address is added to the adjacency database, the IS shall generate an adjacencyStateChange (Up) event on that adjacency.",
         "present_state": [
-          "unknown"
+          "Unknown"
         ],
         "condition": [
           "When a new data link address or NSAP address is added to the adjacency database"
@@ -40,13 +40,13 @@
   {
     "id": 5,
     "title": "8.2.2 Receiving ISH PDUs by an intermediate system\n",
-    "text": "On receipt of an ISH PDU by an Intermediate System, the IS shall create an adjacency (with adjacencyState \u201cInitialising\u201d and neighbourSystemType \u201cUnknown\u201d), if one does not already exist, and then perform the following actions:\na) If the adjacencyState is \u201cUp\u201d and the ID portion of the NET field in the ISH PDU does not match the neigh-bourID of the adjacency then the IS shall\n1) generate an adjacencyStateChange (Down) event;\n2) delete the adjacency; and\n3) create a new adjacency with:\ni. adjacencyState set to \u201cInitialising\u201d, and\nii. neighbourSystemType set to \u201cUnknown\u201d.\n4) perform the following actions.\nb) If the adjacencyState is \u201cInitialising\u201d, and the neighbourSystemType status is \u201cIntermediate System\u201d, the ISH PDU shall be ignored.\nc) If the adjacencyState is \u201cInitialising\u201d and the neighbourSystemType status is not \u201cIntermediate System\u201d, a point-to- point IIH PDU shall be transmitted as described in 8.2.4.\nd) The neighbourSystemType shall be set to \u201cIntermediate System\u201d indicating that the neighbour is an Intermediate system, but the type (L1 or L2) is, as yet, unknown.\ne) The circuitType field shall be set according to Table 4.\n",
+    "text": "On receipt of an ISH PDU by an Intermediate System, the IS shall create an adjacency (with adjacencyState \u201cInitialising\u201d and neighbourSystemType \u201cUnknown\u201d), if one does not already exist, and then perform the following actions:\na) If the adjacencyState is \u201cUp\u201d and the ID portion of the NET field in the ISH PDU does not match the neigh-bourID of the adjacency then the IS shall\n1) generate an adjacencyStateChange (Down) event;\n2) delete the adjacency; and\n3) create a new adjacency with:\ni. adjacencyState set to \u201cInitialising\u201d, and\nii. neighbourSystemType set to \u201cUnknown\u201d.\n4) perform the following actions.\nb) If the adjacencyState is \u201cInitialising\u201d, and the neighbourSystemType status is \u201cIntermediate System\u201d, the ISH PDU shall be ignored.\nc) If the adjacencyState is \u201cInitialising\u201d and the neighbourSystemType status is not \u201cIntermediate System\u201d, a point-to- point IIH PDU shall be transmitted as described in 8.2.4.\nd) The neighbourSystemType shall be set to \u201cIntermediate System\u201d indicating that the neighbour is an Intermediate system, but the type (L1 or L2) is, as yet, Unknown.\ne) The circuitType field shall be set according to Table 4.\n",
     "extraction": [
       {
         "id": 0,
         "text": "if one does not already exist, and then perform the following actions: a) If the adjacencyState is \u201cUp\u201d and the ID portion of the NET field in the ISH PDU does not match the neigh-bourID of the adjacency then the IS shall 1) generate an adjacencyStateChange (Down) event; 2) delete the adjacency; and 3) create a new adjacency with: i) adjacencyState set to \u201cInitialising\u201d, and ii) neighbourSystemType set to \u201cUnknown\u201d.",
         "present_state": [
-          "unknown"
+          "Unknown"
         ],
         "condition": [
           "If the adjacencyState is \u201cUp\u201d and the ID portion of the NET field in the ISH PDU does not match the neigh-bourID of the adjacency"
@@ -90,7 +90,7 @@
         "id": 0,
         "text": "If the local system is of iSType \u201cL1IntermediateSystem\u201d and the adjacency is in state \u201cUp\u201d, the IS shall delete the adjacency and generate an adjacencyStateChange (Down \u2013 Area Mismatch)\u201d event .",
         "present_state": [
-          "unknown"
+          "Unknown"
         ],
         "condition": [
           "If the local system is of iSType \u201cL1IntermediateSystem\u201d and the adjacency is in state \u201cUp\u201d"
@@ -103,7 +103,7 @@
         "id": 1,
         "text": "If the action taken is \u201cAccept\u201d and the neighbor System ID in the adjacency does not match the source ID field from the PDU, or the new value computed for the circuit ID is different from that in the existing adjacency, the IS shall 1) generate an adjacencyStateChange (Down) event, and 2) delete the adjacency.",
         "present_state": [
-          "unknown"
+          "Unknown"
         ],
         "condition": [
           "If the action taken is \u201cAccept\u201d and the neighbor System ID in the adjacency does not match the source ID field from the PDU, or the new value computed for the circuit ID is different from that in the existing adjacency"
@@ -123,7 +123,7 @@
         "id": 0,
         "text": "If a neighbour is not heard from in that time, the IS shall a) purge it from the database; and b) generate an adjacencyStateChange (Down) event.",
         "present_state": [
-          "unknown"
+          "Unknown"
         ],
         "condition": [
           "If a neighbour is not heard from in that time"
@@ -287,8 +287,8 @@
         "id": 0,
         "text": "When R reports the local system\u2019s SNPA address in its Level n LAN IIH PDUs, the IS shall d) set the adjacency\u2019s adjacencyState to \u201cUp\u201d, and e) generate an adjacencyStateChange (Up)\u201d event.",
         "present_state": [
-          "unknown",
-          "unknown"
+          "Unknown",
+          "Unknown"
         ],
         "condition": [
           "When R reports the local system\u2019s SNPA address in its Level n LAN IIH PDUs",
@@ -310,7 +310,7 @@
         "id": 0,
         "text": "If a neighbour is not heard from in that time, the IS shall a) purge it from the database; and b) generate an adjacencyStateChange (Down) event.",
         "present_state": [
-          "unknown"
+          "Unknown"
         ],
         "condition": [
           "If a neighbour is not heard from in that time"
@@ -330,15 +330,15 @@
         "id": 0,
         "text": "If a Level n LAN IIH PDU is received from neighbour N, and this system\u2019s lANAddress is no longer in N\u2019s IIH PDU, the IS shall a) set the adjacency\u2019s adjacencyState to \u201cinitialising\u201d, and b) generate an adjacencyStateChange (Down) event.",
         "present_state": [
-          "unknown",
-          "unknown"
+          "Unknown",
+          "Unknown"
         ],
         "condition": [
           "If a Level n LAN IIH PDU is received from neighbour N, and this system\u2019s lANAddress is no longer in N\u2019s IIH PDU",
           "If a Level n LAN IIH PDU is received from neighbour N, and this system\u2019s lANAddress is no longer in N\u2019s IIH PDU"
         ],
         "new_state": [
-          "initialising",
+          "Initialising",
           "adjacencyStateChange (Down)"
         ]
       }
@@ -353,7 +353,7 @@
         "id": 0,
         "text": "If an old adjacency must be purged, the IS shall generate an adjacencyStateChange (Down) event for that adjacency.",
         "present_state": [
-          "unknown"
+          "Unknown"
         ],
         "condition": [
           "If an old adjacency must be purged"
@@ -391,7 +391,7 @@
         "id": 0,
         "text": "When a new data link address or NSAP address is added to the adjacency database, the IS shall generate an adjacencyStateChange (Up) event on that adjacency.",
         "present_state": [
-          "unknown"
+          "Unknown"
         ],
         "condition": [
           "When a new data link address or NSAP address is added to the adjacency database"

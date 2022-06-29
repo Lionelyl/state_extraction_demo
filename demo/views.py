@@ -5,14 +5,19 @@ import os
 from demo import models
 
 def redire(request):
-    return redirect('/index/')
+    return redirect('/index/?name=isis')
 
 # request 默认参数
 def index(request):
     # print(os.getcwd())
-
+    name = ""
+    name = request.GET.get("name")
+    print(name)
     # data = []
-    data = models.Result.objects.all()
+    if not name :
+        data = models.Result.objects.all()
+    else:
+        data = models.Transition.objects.filter(name=name)
     print(data)
     return render(request,'index.html' ,{'data':data})
     # return HttpResponse("hello world!")
@@ -23,14 +28,47 @@ def delete(request):
     return redirect('/index/')
 
 def create(request):
-    with open('./demo/data/data.json', 'r') as fp:
+    # with open('./demo/data/isis.json', 'r') as fp:
+    #     data = json.load(fp)
+    # for item in data:
+    #     if item['extraction']:
+    #         models.Result.objects.create(part_id=item['id'], title=item['title'], text=item['text'], sentence=item['extraction'][0]['text'],
+    #                                      cur_state=item['extraction'][0]['present_state'][0],
+    #                                      condition=item['extraction'][0]['condition'][0],
+    #                                      new_state=item['extraction'][0]['new_state'][0])
+
+    ##### isis #####
+    with open('./demo/data/isis.json', 'r') as fp:
         data = json.load(fp)
     for item in data:
         if item['extraction']:
-            models.Result.objects.create(part_id=item['id'], title=item['title'], text=item['text'], sentence=item['extraction'][0]['text'],
-                                         cur_state=item['extraction'][0]['present_state'][0],
-                                         condition=item['extraction'][0]['condition'][0],
-                                         new_state=item['extraction'][0]['new_state'][0])
+            models.Transition.objects.create(name="isis", text=item['title']+item['text'],
+                                             sentence=item['extraction'][0]['text'],
+                                             cur_state=item['extraction'][0]['present_state'][0],
+                                             event=item['extraction'][0]['condition'][0],
+                                             new_state=item['extraction'][0]['new_state'][0])
+
+    ##### bgpv4 #######
+    with open('./demo/data/bgpv4.json', 'r') as fp:
+        data = json.load(fp)
+    for item in data:
+        for t in item['transition']:
+            models.Transition.objects.create(name = "bgpv4", text = item['text'],
+                                             sentence = t['text'],
+                                             cur_state = t['cur_state'],
+                                             event = t['event'],
+                                             new_state = t['new_state'])
+    ##### odpf ######
+    with open('./demo/data/ospf.json', 'r') as fp:
+        data = json.load(fp)
+    for item in data:
+        for t in item['transition']:
+            models.Transition.objects.create(name = "ospf", text = item['text'],
+                                             sentence = t['sentence'],
+                                             cur_state = t['cur_state'],
+                                             event = t['event'],
+                                             new_state = t['new_state'])
+
     return redirect('/index/')
 
 def edit(request, nid):
@@ -48,7 +86,7 @@ def edit(request, nid):
     print(current_state)
     print(transfer_condition)
     print(new_state)
-    models.Result.objects.filter(id=nid).update(cur_state=current_state, condition=transfer_condition, new_state=new_state)
+    models.Result.objects.filter(id=nid).update(cur_state=current_state, event=transfer_condition, new_state=new_state)
     return redirect('/index/')
 
 def draw(request, nid):

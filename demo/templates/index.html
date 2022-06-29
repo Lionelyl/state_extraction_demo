@@ -2,6 +2,11 @@
 
 {% block container %}
 <div class="container">
+    <div style="margin-bottom: 10px">
+        <a class="btn btn-primary" href="#" >
+            <span class="glyphicon glyphicon-plus-sign" aria-hidden="true"></span>
+            Add </a>
+    </div>
     <div class="panel panel-default">
         <div class="panel-heading">
             Extract Result
@@ -10,11 +15,11 @@
         <table class="table table-bordered">
             <thead>
             <tr>
-                <th>ID</th>
+{#                <th>ID</th>#}
                 <th>raw text</th>`
                 <th>related sentence</th>
                 <th>current state</th>
-                <th>transfer condition</th>
+                <th>event</th>
                 <th>new state(or state change)</th>
                 <th>option</th>
             </tr>
@@ -22,11 +27,11 @@
             <tbody>
             {% for obj in data %}
                 <tr>
-                    <th scope="row">{{ obj.id }}</th>
-                    <td >{{ obj.title }} {{ obj.text }}</td>
+{#                    <th scope="row">{{ obj.id }}</th>#}
+                    <td>{{ obj.text }}</td>
                     <td>{{ obj.sentence }}</td>
                     <td>{{ obj.cur_state}}</td>
-                    <td>{{ obj.condition }}</td>
+                    <td>{{ obj.event }}</td>
                     <td>{{ obj.new_state }}</td>
                     <td>
 {#                        <a class="btn btn-primary btn-xs" style="width: 44px" href="/edit/?nid={{ obj.id }}">edit</a>#}

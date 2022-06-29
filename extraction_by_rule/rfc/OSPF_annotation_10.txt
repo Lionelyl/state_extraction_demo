@@ -1,0 +1,295 @@
+         State(s):  Down
+
+            Event:  Start
+
+        New state:  Attempt
+
+           Action:  Send an Hello Packet to the neighbor (this neighbor
+                    is always associated with an NBMA network) and start
+                    the Inactivity Timer for the neighbor.  The timer's
+                    later firing would indicate that communication with
+                    the neighbor was not attained.
+
+
+         State(s):  Attempt
+
+
+
+
+ [Page 89]
+
+
+
+            Event:  HelloReceived
+
+        New state:  Init
+
+           Action:  Restart the Inactivity Timer for the neighbor, since
+                    the neighbor has now been heard from.
+
+
+         State(s):  Down
+
+            Event:  HelloReceived
+
+        New state:  Init
+
+           Action:  Start the Inactivity Timer for the neighbor.  The
+                    timer's later firing would indicate that the
+                    neighbor is dead.
+
+
+         State(s):  Init or greater
+
+            Event:  HelloReceived
+
+        New state:  No state change.
+
+           Action:  Restart the Inactivity Timer for the neighbor, since
+                    the neighbor has again been heard from.
+
+
+         State(s):  Init
+
+            Event:  2-WayReceived
+
+        New state:  Depends upon action routine.
+
+           Action:  Determine whether an adjacency should be established
+                    with the neighbor (see Section 10.4).  If not, the
+                    new neighbor state is 2-Way.
+
+                    Otherwise (an adjacency should be established) the
+                    neighbor state transitions to ExStart.  Upon
+                    entering this state, the router increments the DD
+
+
+
+ [Page 90]
+
+
+
+                    sequence number in the neighbor data structure.  If
+                    this is the first time that an adjacency has been
+                    attempted, the DD sequence number should be assigned
+                    some unique value (like the time of day clock).  It
+                    then declares itself master (sets the master/slave
+                    bit to master), and starts sending Database
+                    Description Packets, with the initialize (I), more
+                    (M) and master (MS) bits set.  This Database
+                    Description Packet should be otherwise empty.  This
+                    Database Description Packet should be retransmitted
+                    at intervals of RxmtInterval until the next state is
+                    entered (see Section 10.8).
+
+
+         State(s):  ExStart
+
+            Event:  NegotiationDone
+
+        New state:  Exchange
+
+           Action:  The router must list the contents of its entire area
+                    link state database in the neighbor Database summary
+                    list.  The area link state database consists of the
+                    router-LSAs, network-LSAs and summary-LSAs contained
+                    in the area structure, along with the AS-external-
+                    LSAs contained in the global structure.  AS-
+                    external-LSAs are omitted from a virtual neighbor's
+                    Database summary list.  AS-external-LSAs are omitted
+                    from the Database summary list if the area has been
+                    configured as a stub (see Section 3.6).  LSAs whose
+                    age is equal to MaxAge are instead added to the
+                    neighbor's Link state retransmission list.  A
+                    summary of the Database summary list will be sent to
+                    the neighbor in Database Description packets.  Each
+                    Database Description Packet has a DD sequence
+                    number, and is explicitly acknowledged.  Only one
+                    Database Description Packet is allowed outstanding
+                    at any one time.  For more detail on the sending and
+                    receiving of Database Description packets, see
+                    Sections 10.8 and 10.6.
+
+
+
+
+
+ [Page 91]
+
+
+
+         State(s):  Exchange
+
+            Event:  ExchangeDone
+
+        New state:  Depends upon action routine.
+
+           Action:  If the neighbor Link state request list is empty,
+                    the new neighbor state is Full.  No other action is
+                    required.  This is an adjacency's final state.
+
+                    Otherwise, the new neighbor state is Loading.  Start
+                    (or continue) sending Link State Request packets to
+                    the neighbor (see Section 10.9).  These are requests
+                    for the neighbor's more recent LSAs (which were
+                    discovered but not yet received in the Exchange
+                    state).  These LSAs are listed in the Link state
+                    request list associated with the neighbor.
+
+
+         State(s):  Loading
+
+            Event:  Loading Done
+
+        New state:  Full
+
+           Action:  No action required.  This is an adjacency's final
+                    state.
+
+
+         State(s):  2-Way
+
+            Event:  AdjOK?
+
+        New state:  Depends upon action routine.
+
+           Action:  Determine whether an adjacency should be formed with
+                    the neighboring router (see Section 10.4).  If not,
+                    the neighbor state remains at 2-Way.  Otherwise,
+                    transition the neighbor state to ExStart and perform
+                    the actions associated with the above state machine
+                    entry for state Init and event 2-WayReceived.
+
+
+
+
+ [Page 92]
+
+
+
+         State(s):  ExStart or greater
+
+            Event:  AdjOK?
+
+        New state:  Depends upon action routine.
+
+           Action:  Determine whether the neighboring router should
+                    still be adjacent.  If yes, there is no state change
+                    and no further action is necessary.
+
+                    Otherwise, the (possibly partially formed) adjacency
+                    must be destroyed.  The neighbor state transitions
+                    to 2-Way.  The Link state retransmission list,
+                    Database summary list and Link state request list
+                    are cleared of LSAs.
+
+
+         State(s):  Exchange or greater
+
+            Event:  SeqNumberMismatch
+
+        New state:  ExStart
+
+           Action:  The (possibly partially formed) adjacency is torn
+                    down, and then an attempt is made at
+                    reestablishment.  The neighbor state first
+                    transitions to ExStart.  The Link state
+                    retransmission list, Database summary list and Link
+                    state request list are cleared of LSAs.  Then the
+                    router increments the DD sequence number in the
+                    neighbor data structure, declares itself master
+                    (sets the master/slave bit to master), and starts
+                    sending Database Description Packets, with the
+                    initialize (I), more (M) and master (MS) bits set.
+                    This Database Description Packet should be otherwise
+                    empty (see Section 10.8).
+
+
+         State(s):  Exchange or greater
+
+            Event:  BadLSReq
+
+
+
+
+ [Page 93]
+
+
+
+        New state:  ExStart
+
+           Action:  The action for event BadLSReq is exactly the same as
+                    for the neighbor event SeqNumberMismatch.  The
+                    (possibly partially formed) adjacency is torn down,
+                    and then an attempt is made at reestablishment.  For
+                    more information, see the neighbor state machine
+                    entry that is invoked when event SeqNumberMismatch
+                    is generated in state Exchange or greater.
+
+
+         State(s):  Any state
+
+            Event:  KillNbr
+
+        New state:  Down
+
+           Action:  The Link state retransmission list, Database summary
+                    list and Link state request list are cleared of
+                    LSAs.  Also, the Inactivity Timer is disabled.
+
+
+         State(s):  Any state
+
+            Event:  LLDown
+
+        New state:  Down
+
+           Action:  The Link state retransmission list, Database summary
+                    list and Link state request list are cleared of
+                    LSAs.  Also, the Inactivity Timer is disabled.
+
+
+         State(s):  Any state
+
+            Event:  InactivityTimer
+
+        New state:  Down
+
+           Action:  The Link state retransmission list, Database summary
+                    list and Link state request list are cleared of
+                    LSAs.
+
+
+
+ [Page 94]
+
+
+
+         State(s):  2-Way or greater
+
+            Event:  1-WayReceived
+
+        New state:  Init
+
+           Action:  The Link state retransmission list, Database summary
+                    list and Link state request list are cleared of
+                    LSAs.
+
+
+         State(s):  2-Way or greater
+
+            Event:  2-WayReceived
+
+        New state:  No state change.
+
+           Action:  No action required.
+
+
+         State(s):  Init
+
+            Event:  1-WayReceived
+
+        New state:  No state change.
+
+           Action:  No action required.
+
