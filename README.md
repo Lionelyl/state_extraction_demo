@@ -7,7 +7,7 @@ Django
 
 ## file tree
 ```shell
-├── app # app
+├── demo # app
 ├── extraction_by_rule
 │   ├── Rule_related
 │   └── raw_text
